@@ -9,6 +9,7 @@ A lightweight Python library for accurate token counting and limit validation ac
 - **Proactive Limit Checking**: Validate content length before API calls
 - **Smart Token Management**: Encoding and decoding support
 - **Provider Independence**: Each provider can be installed separately
+- **Provider Ownership**: Each provider can own a piece of functionality
 
 ## Installation
 
