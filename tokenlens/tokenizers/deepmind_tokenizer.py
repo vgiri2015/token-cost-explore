@@ -26,7 +26,8 @@ class DeepMindTokenizer(BaseTokenizer):
             response = requests.post(
                 f"{self.base_url}/tokenize",
                 headers=self.headers,
-                json={"text": text}
+                json={"text": text},
+                timeout=(3.05, 10)  # tomosu: 01.external-call-timeouts
             )
             if response.status_code == 200:
                 return response.json()["tokens"]
