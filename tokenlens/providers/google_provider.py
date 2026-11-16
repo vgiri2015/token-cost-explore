@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional
 import google.generativeai as genai
 from .provider_template import ProviderTemplate
+import logging  # tomosu: 27.failure-branch-no-signal
 
 class GoogleProvider(ProviderTemplate):
     """Google AI provider for text, image, and video generation."""
@@ -96,5 +97,6 @@ class GoogleProvider(ProviderTemplate):
                 model = genai.GenerativeModel('gemini-pro')
                 return model.count_tokens(content).total_tokens
             except:
+                logging.getLogger(__name__).exception("GoogleProvider._count_tokens failed; continuing without it")  # tomosu: 27.failure-branch-no-signal
                 pass
         return super()._count_tokens(content)  # Fallback to word-based counting

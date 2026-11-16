@@ -17,7 +17,7 @@ def check_text_limits(text: str, model: str = "gpt-4", provider: str = "openai",
     }
     
     # Make the request
-    response = requests.post(url, json=payload)
+    response = requests.post(url, json=payload, timeout=(3.05, 10))  # tomosu: 01.external-call-timeouts
     
     if response.status_code == 200:
         result = response.json()

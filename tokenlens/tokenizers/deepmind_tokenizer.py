@@ -26,7 +26,8 @@ class DeepMindTokenizer(BaseTokenizer):
             response = requests.post(
                 f"{self.base_url}/tokenize",
                 headers=self.headers,
-                json={"text": text}
+                json={"text": text},
+                timeout=(3.05, 10)  # tomosu: 01.external-call-timeouts
             )
             if response.status_code == 200:
                 return response.json()["tokens"]
@@ -42,7 +43,8 @@ class DeepMindTokenizer(BaseTokenizer):
             response = requests.post(
                 f"{self.base_url}/detokenize",
                 headers=self.headers,
-                json={"tokens": token_ids}
+                json={"tokens": token_ids},
+                timeout=(3.05, 10)  # tomosu: 01.external-call-timeouts
             )
             if response.status_code == 200:
                 return response.json()["text"]
@@ -58,7 +60,8 @@ class DeepMindTokenizer(BaseTokenizer):
             response = requests.post(
                 f"{self.base_url}/count_tokens",
                 headers=self.headers,
-                json={"text": text}
+                json={"text": text},
+                timeout=(3.05, 10)  # tomosu: 01.external-call-timeouts
             )
             if response.status_code == 200:
                 return response.json()["count"]

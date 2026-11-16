@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional
 import cohere
 from .provider_template import ProviderTemplate
+import logging  # tomosu: 27.failure-branch-no-signal
 
 class CohereProvider(ProviderTemplate):
     """Cohere provider for text generation, embeddings, and reranking."""
@@ -118,5 +119,6 @@ class CohereProvider(ProviderTemplate):
             try:
                 return self.client.tokenize(text=content).length
             except:
+                logging.getLogger(__name__).exception("CohereProvider._count_tokens failed; continuing without it")  # tomosu: 27.failure-branch-no-signal
                 pass
         return super()._count_tokens(content)  # Fallback to word-based counting

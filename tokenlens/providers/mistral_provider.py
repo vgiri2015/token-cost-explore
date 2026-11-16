@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional
 import mistralai
 from .provider_template import ProviderTemplate
+import logging  # tomosu: 27.failure-branch-no-signal
 
 class MistralProvider(ProviderTemplate):
     """Mistral AI provider for text generation and embeddings."""
@@ -92,5 +93,6 @@ class MistralProvider(ProviderTemplate):
             try:
                 return self.client.count_tokens(content)
             except:
+                logging.getLogger(__name__).exception("MistralProvider._count_tokens failed; continuing without it")  # tomosu: 27.failure-branch-no-signal
                 pass
         return super()._count_tokens(content)  # Fallback to word-based counting
