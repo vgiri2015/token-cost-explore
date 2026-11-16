@@ -1,6 +1,7 @@
 from typing import Dict, Any, Optional
 import openai
 from . import BaseProvider
+import logging  # tomosu: 21.fallback-hides-failure
 
 class OpenAIProvider(BaseProvider):
     """OpenAI API provider integration."""
@@ -185,4 +186,5 @@ class OpenAIProvider(BaseProvider):
             
             return model_limits
         except Exception as e:
+            logging.getLogger(__name__).exception("OpenAIProvider.list_models failed; returning a fallback value")  # tomosu: 21.fallback-hides-failure
             return {}
