@@ -19,7 +19,7 @@ class CohereTokenizer(BaseTokenizer):
         try:
             response = self.client.tokenize(text=text)
             return response.tokens
-        except:
+        except Exception:
             return super().encode(text)
     
     def decode(self, token_ids: List[int]) -> str:
