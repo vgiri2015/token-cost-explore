@@ -18,11 +18,8 @@ class GoogleTokenizer(BaseTokenizer):
         """Encode text into token IDs."""
         if not self.model:
             return super().encode(text)
-        try:
-            response = self.model.count_tokens(text)
-            return list(range(response.total_tokens))  # Google doesn't expose token IDs
-        except:
-            return super().encode(text)
+        # Google doesn't expose token IDs
+        raise NotImplementedError("Google does not expose token IDs; use count_tokens instead")
     
     def decode(self, token_ids: List[int]) -> str:
         """Decode token IDs back into text."""
