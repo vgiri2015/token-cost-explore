@@ -16,12 +16,8 @@ class MistralTokenizer(BaseTokenizer):
         """Encode text into token IDs."""
         if not self.client:
             return super().encode(text)
-        try:
-            # Mistral doesn't expose token IDs directly
-            count = self.client.count_tokens(text)
-            return list(range(count))
-        except:
-            return super().encode(text)
+        # Mistral doesn't expose token IDs directly
+        raise NotImplementedError("Mistral does not expose token IDs; use count_tokens instead")
     
     def decode(self, token_ids: List[int]) -> str:
         """Decode token IDs back into text."""
