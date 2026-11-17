@@ -23,13 +23,8 @@ class GoogleTokenizer(BaseTokenizer):
     
     def decode(self, token_ids: List[int]) -> str:
         """Decode token IDs back into text."""
-        if not self.model:
-            return super().decode(token_ids)
-        try:
-            # Google doesn't provide decoding functionality
-            return super().decode(token_ids)
-        except:
-            return super().decode(token_ids)
+        # Google doesn't provide decoding functionality
+        return super().decode(token_ids)
     
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in the text."""
