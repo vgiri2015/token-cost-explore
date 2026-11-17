@@ -102,11 +102,14 @@ class MetaProvider(ProviderTemplate):
         """List all available Meta AI models and their limits."""
         try:
             # Return static list of models since Meta AI doesn't have a public list models API
+            all_limits = self.get_model_limits("")
+            if not isinstance(all_limits, dict):
+                raise RuntimeError("Meta AI model limits could not be loaded from config")
             models = {}
-            for model_name in self.get_model_limits("").keys():
+            for model_name in all_limits.keys():
                 limits = self.get_model_limits(model_name)
                 if limits:
                     models[model_name] = limits
             return models
         except Exception as e:
-            return {}
+            raise RuntimeError(f"Failed to list Meta AI models: {type(e).__name__}: {e}") from e
