@@ -77,35 +77,29 @@ def test_openai_token_limits():
         logger.info(f"  Max tokens: {limits['token_limit']}")
         logger.info(f"  Max response tokens: {limits['max_response_tokens']}")
         
-        try:
-            # Initialize OpenAI tokenizer
-            tokenizer = OpenAITokenizer(model_name=model_name, api_key=api_key)
+        # Initialize OpenAI tokenizer
+        tokenizer = OpenAITokenizer(model_name=model_name, api_key=api_key)
+        
+        test_cases = [
+            ("Small text", "Hello, world!"),
+            ("Medium text", generate_test_text(1000)),
+            ("Large text", generate_test_text(10000)),
+            ("Max input text", generate_test_text(limits['token_limit'] * 4))
+        ]
+        
+        for test_name, text in test_cases:
+            # Count tokens
+            token_count = tokenizer.count_tokens(text)
+            logger.info(f"{test_name}: {token_count} tokens")
+            assert token_count <= limits['token_limit'], (
+                f"{model_name} {test_name}: {token_count} tokens exceeds limit {limits['token_limit']}"
+            )
             
-            test_cases = [
-                ("Small text", "Hello, world!"),
-                ("Medium text", generate_test_text(1000)),
-                ("Large text", generate_test_text(10000)),
-                ("Max input text", generate_test_text(limits['token_limit'] * 4))
-            ]
-            
-            for test_name, text in test_cases:
-                try:
-                    # Count tokens
-                    token_count = tokenizer.count_tokens(text)
-                    status = "PASS" if token_count <= limits['token_limit'] else "FAIL"
-                    logger.info(f"{test_name}: {token_count} tokens [{status}]")
-                    
-                    # Test encoding/decoding
-                    encoded = tokenizer.encode(text[:100])
-                    decoded = tokenizer.decode(encoded)
-                    encoding_status = "PASS" if decoded.strip() else "FAIL"
-                    logger.info(f"{test_name} encoding/decoding: [{encoding_status}]")
-                    
-                except Exception as e:
-                    logger.error(f"Error in {test_name}: {str(e)}")
-                    
-        except Exception as e:
-            logger.error(f"Error initializing tokenizer for {model_name}: {str(e)}")
+            # Test encoding/decoding
+            encoded = tokenizer.encode(text[:100])
+            decoded = tokenizer.decode(encoded)
+            assert decoded.strip(), f"{model_name} {test_name}: decoded text is empty"
+            assert decoded == text[:100], f"{model_name} {test_name}: decode round-trip mismatch"
 
 if __name__ == "__main__":
     test_openai_token_limits()
