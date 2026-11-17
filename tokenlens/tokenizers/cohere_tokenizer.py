@@ -29,8 +29,8 @@ class CohereTokenizer(BaseTokenizer):
         try:
             response = self.client.detokenize(tokens=token_ids)
             return response.text
-        except:
-            return super().decode(token_ids)
+        except Exception as e:
+            raise RuntimeError(f"Cohere detokenize failed: {type(e).__name__}: {e}") from e
     
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in the text."""
