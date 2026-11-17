@@ -144,8 +144,14 @@ class OpenAIProvider(BaseProvider):
         
         # Extract audio info
         format = audio_info.get("format", "mp3").lower()
-        duration = float(audio_info.get("duration", 0))  # in seconds
-        file_size = float(audio_info.get("file_size", 0))  # in MB
+        try:
+            duration = float(audio_info.get("duration", 0))  # in seconds
+            file_size = float(audio_info.get("file_size", 0))  # in MB
+        except (TypeError, ValueError):
+            return {"error": "Invalid audio info: duration and file_size must be numeric"}
+        for value in (duration, file_size):
+            if value != value or value in (float("inf"), float("-inf")) or value < 0:
+                return {"error": "Invalid audio info: duration and file_size must be finite, non-negative numbers"}
         
         # Check constraints
         errors = []
@@ -157,8 +163,26 @@ class OpenAIProvider(BaseProvider):
         if duration > max_duration:
             errors.append(f"Duration exceeds limit of {max_duration} seconds")
         
-        max_file_size = float(model_limits["additional_constraints"]["file_size"].replace("MB", ""))
-        if file_size > max_file_size:
+        constraints = model_limits.get("additional_constraints") or {}
+        if not isinstance(constraints, dict):
+            constraints = {}
+        raw_max_file_size = constraints.get("file_size")
+        max_file_size = None
+        if raw_max_file_size is not None:
+            try:
+                size_str = str(raw_max_file_size).strip().upper()
+                factor = 1.0
+                for unit, mult in (("GB", 1024.0), ("MB", 1.0), ("KB", 1.0 / 1024)):
+                    if size_str.endswith(unit):
+                        size_str = size_str[:-len(unit)].strip()
+                        factor = mult
+                        break
+                max_file_size = float(size_str) * factor
+                if max_file_size != max_file_size or max_file_size in (float("inf"), float("-inf")) or max_file_size < 0:
+                    max_file_size = None
+            except (TypeError, ValueError):
+                max_file_size = None
+        if max_file_size is not None and file_size > max_file_size:
             errors.append(f"File size exceeds limit of {max_file_size}MB")
         
         if errors:
@@ -169,7 +193,7 @@ class OpenAIProvider(BaseProvider):
             "model": model_name,
             "supported_formats": model_limits["supported_formats"],
             "max_duration": model_limits["max_duration"],
-            "max_file_size": model_limits["additional_constraints"]["file_size"]
+            "max_file_size": constraints.get("file_size")
         }
     
     def list_models(self) -> Dict[str, Dict[str, Any]]:
