@@ -82,7 +82,10 @@ class OpenAIProvider(BaseProvider):
         # Use tiktoken to count tokens
         try:
             import tiktoken
-            encoding = tiktoken.encoding_for_model(model_name)
+            try:
+                encoding = tiktoken.encoding_for_model(model_name)
+            except KeyError:
+                encoding = tiktoken.get_encoding("cl100k_base")
             token_count = len(encoding.encode(text))
             
             token_limit = model_limits["token_limit"]
