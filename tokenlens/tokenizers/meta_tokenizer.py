@@ -13,16 +13,20 @@ class MetaTokenizer(BaseTokenizer):
         super().__init__()
         self.api_key = api_key
         self.model_name = model_name
+        auth_token = {"use_auth_token": api_key} if api_key else {}
         try:
             # Try to use HuggingFace's Llama tokenizer first
-            auth_token = {"use_auth_token": api_key} if api_key else {}
             self.tokenizer = LlamaTokenizer.from_pretrained(model_name, **auth_token)
-        except:
+        except Exception as llama_error:
             try:
                 # Fall back to AutoTokenizer
-                self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            except:
-                self.tokenizer = None
+                self.tokenizer = AutoTokenizer.from_pretrained(model_name, **auth_token)
+            except Exception as auto_error:
+                raise ValueError(
+                    f"Failed to load tokenizer for {model_name}: "
+                    f"LlamaTokenizer error: {llama_error}; "
+                    f"AutoTokenizer error: {auto_error}"
+                ) from auto_error
     
     def encode(self, text: str) -> List[int]:
         """Encode text into token IDs."""
