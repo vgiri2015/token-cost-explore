@@ -31,7 +31,7 @@ class GoogleTokenizer(BaseTokenizer):
         if not self.model:
             return super().count_tokens(text)
         try:
-            response = self.model.count_tokens(text)
+            response = self.model.count_tokens(text, request_options={'timeout': 10})
             return response.total_tokens
-        except:
+        except Exception:
             return super().count_tokens(text)
