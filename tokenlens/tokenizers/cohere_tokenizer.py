@@ -38,6 +38,6 @@ class CohereTokenizer(BaseTokenizer):
             return super().count_tokens(text)
         try:
             response = self.client.tokenize(text=text)
-            return response.length
-        except:
+            return len(response.tokens)
+        except Exception:
             return super().count_tokens(text)
