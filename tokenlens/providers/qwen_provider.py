@@ -22,6 +22,8 @@ class QwenProvider(ProviderTemplate):
         """Check text model limits for Qwen models."""
         # Get model configuration
         model_config = self.config_loader.get_model_details("text", "qwen", model)
+        if not model_config or "token_limit" not in model_config:
+            return {"error": f"Model {model} not found or has no token_limit configured"}
         
         # Calculate tokens using Qwen's tokenizer
         total_tokens = len(self.tokenizer.encode(content))
@@ -32,9 +34,13 @@ class QwenProvider(ProviderTemplate):
         # Calculate batches if needed
         batches = None
         if not is_within_limit:
-            batch_size = model_config["token_limit"] // 2
+            token_limit = model_config["token_limit"]
+            batch_size = token_limit // 2
             if additional_constraints and "batch_size" in additional_constraints:
                 batch_size = additional_constraints["batch_size"]
+                if isinstance(batch_size, bool) or not isinstance(batch_size, int) or batch_size <= 0:
+                    return {"error": f"Invalid batch_size {batch_size!r}: must be a positive integer"}
+            batch_size = max(1, min(batch_size, token_limit))
             
             # Calculate character positions for batches
             batches = []
@@ -42,12 +48,13 @@ class QwenProvider(ProviderTemplate):
             current_batch = 0
             current_tokens = 0
             start_char = 0
+            batch_start = 0
             
             for i, token in enumerate(tokens):
                 current_tokens += 1
                 if current_tokens >= batch_size or i == len(tokens) - 1:
-                    # Decode tokens to find character position
-                    end_char = len(self.tokenizer.decode(tokens[:i+1]))
+                    # Decode only the current batch slice to find character position
+                    end_char = start_char + len(self.tokenizer.decode(tokens[batch_start:i+1]))
                     batches.append({
                         "batch": current_batch + 1,
                         "tokens": current_tokens,
@@ -55,6 +62,7 @@ class QwenProvider(ProviderTemplate):
                         "end_char": end_char
                     })
                     start_char = end_char
+                    batch_start = i + 1
                     current_tokens = 0
                     current_batch += 1
         
