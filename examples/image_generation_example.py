@@ -16,7 +16,7 @@ def check_image_generation_limits(prompt: str, model: str = "dall-e-3", provider
         "api_key": api_key
     }
     
-    response = requests.post(url, json=payload)
+    response = requests.post(url, json=payload, timeout=(3.05, 10))  # tomosu: 01.external-call-timeouts
     
     if response.status_code == 200:
         result = response.json()

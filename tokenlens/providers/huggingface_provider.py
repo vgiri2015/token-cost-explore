@@ -26,7 +26,7 @@ class HuggingFaceProvider(BaseProvider):
         """List available HuggingFace models and their limits."""
         try:
             # Filter for text generation models
-            models = self.api.list_models(filter="text-generation")
+            models = self.api.list_models(filter="text-generation", sort="downloads", direction=-1, limit=100)
             
             model_limits = {}
             for model in models:
@@ -36,4 +36,4 @@ class HuggingFaceProvider(BaseProvider):
             
             return model_limits
         except Exception as e:
-            return {}
+            return {"error": {"message": f"Failed to list HuggingFace models: {type(e).__name__}: {e}"}}
