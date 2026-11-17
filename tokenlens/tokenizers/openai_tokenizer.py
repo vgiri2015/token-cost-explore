@@ -11,11 +11,11 @@ class OpenAITokenizer(BaseTokenizer):
     def __init__(self, model_name: str = "gpt-4", api_key: Optional[str] = None):
         """Initialize OpenAI tokenizer with model name and API key."""
         self.model_name = model_name
+        self.client = OpenAI(api_key=api_key) if api_key else None
         try:
-            self.client = OpenAI(api_key=api_key) if api_key else None
             self.tokenizer = tiktoken.encoding_for_model(model_name)
-        except Exception as e:
-            raise ValueError(f"Failed to initialize OpenAI tokenizer: {str(e)}")
+        except KeyError as e:
+            raise ValueError(f"Failed to initialize OpenAI tokenizer: {str(e)}") from e
     
     def encode(self, text: str) -> List[int]:
         """Encode text into token IDs."""
